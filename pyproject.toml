@@ -1,0 +1,21 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "linrax"
+description = "A JAX-compatible, simplex method-based linear program solver"
+readme = "README.md"
+
+
+version = "2025.01.29"
+requires-python = ">=3.11"
+dependencies = [
+	"jax==0.4.31",
+]
+
+[project.urls]
+Repository = "https://github.com/gtfactslab/linrax.git"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src"]
