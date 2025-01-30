@@ -86,7 +86,7 @@ class SimplexSolutionType:
         return f"SimplexSolutionType(feasible={self.feasible}, bounded={self.bounded})"
 
 
-def fuzzy_argmin(arr: jax.Array, tolerance: float = 1e-5) -> jax.Array:
+def _fuzzy_argmin(arr: jax.Array, tolerance: float = 1e-5) -> jax.Array:
     min_val = jnp.min(arr)
     within_tolerance = jnp.abs(arr - min_val) <= tolerance
     indices = jnp.arange(arr.shape[0])
@@ -176,7 +176,7 @@ def _simplex(
         ratios = jax.lax.select(
             jnp.greater(exiting_rates, 1e-5), div, jnp.inf * jnp.ones_like(div)
         )  # Don't worry about constraints that entering var improves / doesn't affect
-        exiting_row = fuzzy_argmin(ratios)
+        exiting_row = _fuzzy_argmin(ratios)
         sol_type.bounded = jnp.any(exiting_rates > -1e-5).reshape(1)
 
         # Pivot

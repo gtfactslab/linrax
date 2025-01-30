@@ -5,7 +5,7 @@ from typing import Tuple
 
 import pytest
 
-from linrax.optim import linprog, SimplexStep, SimplexSolutionType
+from linrax import linprog, SimplexStep, SimplexSolutionType
 
 
 def compare(
