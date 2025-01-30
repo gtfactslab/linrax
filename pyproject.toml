@@ -11,11 +11,18 @@ readme = "README.md"
 version = "2025.01.29"
 requires-python = ">=3.11"
 dependencies = [
-	"jax==0.4.31",
+	"jax",
 ]
 
 [project.urls]
 Repository = "https://github.com/gtfactslab/linrax.git"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src"]
+packages = ["linrax"]
+
+[tool.hatch.envs.hatch-test]
+extra-dependencies = [
+	"scipy",
+	"matplotlib",
+	"pytest~=8.1",
+]
