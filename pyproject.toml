@@ -8,7 +8,7 @@ description = "A JAX-compatible, simplex method-based linear program solver"
 readme = "README.md"
 
 
-version = "2025.01.29"
+version = "2025.01.30"
 requires-python = ">=3.11"
 dependencies = [
 	"jax",
