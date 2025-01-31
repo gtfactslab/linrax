@@ -86,7 +86,7 @@ class SimplexSolutionType:
         return f"SimplexSolutionType(feasible={self.feasible}, bounded={self.bounded})"
 
 
-def _fuzzy_argmin(arr: jax.Array, tolerance: float = 1e-5) -> jax.Array:
+def _fuzzy_argmin(arr: jax.Array, tolerance: float = 1e-6) -> jax.Array:
     min_val = jnp.min(arr)
     within_tolerance = jnp.abs(arr - min_val) <= tolerance
     indices = jnp.arange(arr.shape[0])
@@ -137,12 +137,12 @@ def _standard_form(
 
 
 def _iteration_needed(
-    simplex_data: Tuple[SimplexStep, SimplexSolutionType],
+    simplex_data: Tuple[SimplexStep, SimplexSolutionType, float],
 ) -> jax.Array:
-    step, sol_type = simplex_data
+    step, sol_type, dual_tol = simplex_data
 
     _iteration_needed = jnp.less(
-        step.tableau[-1, :-1], -1e-5
+        step.tableau[-1, :-1], -dual_tol
     ).any()  # Stop when optimal solution found
     _iteration_needed = jnp.logical_and(
         _iteration_needed, sol_type.feasible
@@ -154,17 +154,20 @@ def _iteration_needed(
 
 
 def _simplex(
-    step: SimplexStep, sol_type: SimplexSolutionType, num_cost_rows: int
+    step: SimplexStep,
+    sol_type: SimplexSolutionType,
+    num_cost_rows: int,
+    dual_tol: float,
 ) -> Tuple[SimplexStep, SimplexSolutionType]:
     def pivot(
-        simplex_data: Tuple[SimplexStep, SimplexSolutionType],
-    ) -> Tuple[SimplexStep, SimplexSolutionType]:
-        step, sol_type = simplex_data
+        simplex_data: Tuple[SimplexStep, SimplexSolutionType, float],
+    ) -> Tuple[SimplexStep, SimplexSolutionType, float]:
+        step, sol_type, dual_tol = simplex_data
         tableau = step.tableau
 
         # Find entering variable (with Bland's rule)
         neg_cost_mul_idx = jnp.where(
-            tableau[-1, :-1] < -1e-5,
+            tableau[-1, :-1] < -dual_tol,
             size=tableau.shape[1] - 1,
             fill_value=tableau.shape[1] - 1,
         )[0]
@@ -174,41 +177,33 @@ def _simplex(
         exiting_rates = tableau[:-num_cost_rows, entering_col]
         div = jnp.divide(tableau[:-num_cost_rows, -1], exiting_rates)
         ratios = jax.lax.select(
-            jnp.greater(exiting_rates, 1e-5), div, jnp.inf * jnp.ones_like(div)
+            jnp.greater(exiting_rates, dual_tol), div, jnp.inf * jnp.ones_like(div)
         )  # Don't worry about constraints that entering var improves / doesn't affect
         exiting_row = _fuzzy_argmin(ratios)
-        sol_type.bounded = jnp.any(exiting_rates > -1e-5).reshape(1)
+        sol_type.bounded = jnp.any(exiting_rates > dual_tol).reshape(1)
 
         # Pivot
         pivot_val = tableau[exiting_row, entering_col]
-        tableau = tableau.at[exiting_row].set(
-            tableau[exiting_row] / pivot_val
-        )  # normalize pivot val to 1
-        other_rows = jnp.setdiff1d(
-            jnp.arange(tableau.shape[0]),
-            exiting_row,
-            assume_unique=True,
-            size=tableau.shape[0] - 1,
-        )
-        for i in other_rows:
-            tableau = tableau.at[i].set(
-                tableau[i] - tableau[i, entering_col] * tableau[exiting_row]
-            )
+        pivot_row = tableau[exiting_row] / pivot_val  # normalize pivot val to 1
+        tableau = jax.vmap(lambda row: row - row[entering_col] * pivot_row)(tableau)
+        tableau = tableau.at[exiting_row].set(pivot_row)
 
         # Update basis set, BFS
         basis = step.basis.at[exiting_row].set(entering_col)
         x = jnp.zeros_like(step.x)
         x = x.at[basis].set(tableau[:-num_cost_rows, -1])
 
-        return SimplexStep(tableau, basis, x), sol_type
+        return SimplexStep(tableau, basis, x), sol_type, dual_tol
 
     # NOTE: this looses reverse mode autodiff. We can accomplish all the same calculations
     # with forward mode, which this does not lose, but they might be slightly less efficient.
-    step, sol_type = jax.lax.while_loop(_iteration_needed, pivot, (step, sol_type))
+    step, sol_type, _ = jax.lax.while_loop(
+        _iteration_needed, pivot, (step, sol_type, dual_tol)
+    )
 
     # Uncomment to debug
-    # while _iteration_needed((step, sol_type)):
-    #     step, sol_type = pivot((step, sol_type))
+    # while _iteration_needed((step, sol_type, dual_tol)):
+    #     step, sol_type, dual_tol = pivot((step, sol_type, dual_tol))
 
     return step, sol_type
 
@@ -221,6 +216,8 @@ def linprog(
     A_eq: jax.Array = jnp.empty((0, 0)),
     b_eq: jax.Array = jnp.empty((0,)),
     unbounded: bool = False,
+    primal_tol: float = 1e-6,
+    dual_tol: float = 1e-6,
 ) -> Tuple[SimplexStep, SimplexSolutionType]:
     """
     Solves a linear program of the form: min c @ x s.t. A_eq @ x = b_eq, A_ub @ x <= b_ub
@@ -250,11 +247,12 @@ def linprog(
     for i in range(A.shape[0]):
         tableau = tableau.at[-1].set(tableau[-1] - tableau[i])
 
+    # Solve auxiliary problem
     basis = jnp.arange(A.shape[1], A.shape[1] + A.shape[0])
     x = jnp.concatenate((jnp.zeros_like(c), b))
     aux_start = SimplexStep(tableau, basis, x)
     aux_sol_type = SimplexSolutionType(jnp.array([True]), jnp.array([True]))
-    aux_sol, aux_sol_type = _simplex(aux_start, aux_sol_type, num_cost_rows=2)
+    aux_sol, aux_sol_type = _simplex(aux_start, aux_sol_type, 2, dual_tol)
     x = aux_sol.x[: c.size]
 
     # Remove auxiliary variables from tableau for real problem
@@ -266,41 +264,23 @@ def linprog(
         assume_unique_indices=True,
     )
 
-    redundant_cons = jnp.concatenate((aux_sol.basis > A.shape[1], jnp.array([False])))
-    redundant_cons = redundant_cons.repeat(tableau.shape[1]).reshape(tableau.shape)
-    # TODO: I don't know if this is correct in general. Really, what I want to do is
-    # make the column corresponding to the auxiliary variable basic, but I'm not sure
-    # of an efficient way to identify this column
-    tableau = jnp.where(redundant_cons, -tableau, tableau)
-
-    # NOTE: The tolerance here determines how much violation of constraints we are comfortable with.
-    # The default 1e-9 seems to be too small, especially for the problems we generate with aux-var
-    # refinement when collapsing along a face. Along auxilliary faces, this selects exactly a corner
-    # of the region in real variables. Logically, this should be fine, but numerically it causes the
-    # problem to be marked as infeasible, and we get no refinement just when we should get the most.
-    feasible = jnp.allclose(c_aux[:-1] @ aux_sol.x, jnp.array([0]), atol=1e-3).reshape(
-        1
+    redundant_cons = jnp.expand_dims(
+        jnp.concatenate((aux_sol.basis > A.shape[1], jnp.array([False]))), -1
     )
+    tableau = jnp.where(redundant_cons, jnp.abs(tableau), tableau)
 
-    # I can increase the above tolerance a lot, but the bigger it gets the more I allow
-    # solutions to violate constraints. This directly makes my refinement worse (by considering
-    # points outside the feasible region). I am confident that I find the right set of basic
-    # variables, but error propagated over all the row operations with large tolerances can
-    # make the solution wrong. Really what I want to do is project this final point back
-    # onto the feasible subspace.
+    feasible = jnp.allclose(
+        c_aux[:-1] @ aux_sol.x, jnp.array([0]), atol=primal_tol
+    ).reshape(1)
 
-    # To do this, I build the (n-m) x n matrix encoding the constraint that every non-basic
-    # variable is zero. Then, vstack A on top of this matrix, b on top of a vector of 0s,
-    # and solve the system Ax = b. Since I can't guarantee the rows of A are independent,
-    # I can't invert A, but I might be able to pinv
-
+    # Solve real problem
     real_start = SimplexStep(
         tableau,
         aux_sol.basis,
         aux_sol.x[: c.size],
     )
     real_sol_type = SimplexSolutionType(feasible, jnp.array([True]))
-    sol, sol_type = _simplex(real_start, real_sol_type, num_cost_rows=1)
+    sol, sol_type = _simplex(real_start, real_sol_type, 1, dual_tol)
 
     # Remove synthetic variables from returned result
     if unbounded:
@@ -310,3 +290,4 @@ def linprog(
         sol.x, _ = jnp.split(sol.x, (len(obj),))
 
     return sol, sol_type
+
