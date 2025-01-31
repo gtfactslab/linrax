@@ -310,5 +310,3 @@ def linprog(
         sol.x, _ = jnp.split(sol.x, (len(obj),))
 
     return sol, sol_type
-
-
