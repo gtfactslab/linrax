@@ -15,8 +15,7 @@ The public function is
 ```python
 import jax 
 import jax.numpy as jnp
-@partial(jax.jit, static_argnames=[
-        "unbounded"])
+@partial(jax.jit, static_argnames=[ "unbounded"])
 def linprog(
     c: jax.Array,
     A_ub: jax.Array = jnp.empty((0, 0)),
@@ -24,8 +23,7 @@ def linprog(
     A_eq: jax.Array = jnp.empty((0, 0)),
     b_eq: jax.Array = jnp.empty((0,)),
     unbounded: bool = False,
-) -> Tuple[SimplexStep, 
-        SimplexSolutionType]:
+) -> Tuple[SimplexStep, SimplexSolutionType]:
     ...
 ```
 
