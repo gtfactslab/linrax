@@ -210,7 +210,7 @@ def _simplex(
 
 @partial(jax.jit, static_argnames=["unbounded"])
 def linprog(
-    obj: jax.Array,
+    c: jax.Array,
     A_ub: jax.Array = jnp.empty((0, 0)),
     b_ub: jax.Array = jnp.empty((0,)),
     A_eq: jax.Array = jnp.empty((0, 0)),
@@ -223,7 +223,7 @@ def linprog(
     Solves a linear program of the form: min c @ x s.t. A_eq @ x = b_eq, A_ub @ x <= b_ub
 
     Args:
-        obj: The coefficients of the linear function to minimize
+        c: The coefficients of the linear function to minimize
         A_eq: Equality constraint matrix
         b_eq: Equality constraint vector
         A_ub: Inequality constraint matrix
@@ -233,39 +233,41 @@ def linprog(
     Returns:
         The vector x that minimizes c @ x subject to the constraints given.
     """
-    A, b, c = _standard_form(obj, A_eq, b_eq, A_ub, b_ub, unbounded)
+    A_std, b_std, c_std = _standard_form(c, A_eq, b_eq, A_ub, b_ub, unbounded)
 
     # _simplex assumes that the last A.shape[0] variables form a feasible basis for the problem
     # This is not true in general (e.g. for problems with lots of equality constraints)
     # Therefore, we first solve a problem with auxiliary variables to find a feasible basis
-    tableau = jnp.hstack((A, jnp.eye(A.shape[0]), b.reshape(-1, 1)))
-    c_extended = jnp.concatenate((c, jnp.zeros(A.shape[0] + 1)))
-    c_aux = jnp.concatenate((jnp.zeros_like(c), jnp.ones(A.shape[0]), jnp.zeros(1)))
+    tableau = jnp.hstack((A_std, jnp.eye(A_std.shape[0]), b_std.reshape(-1, 1)))
+    c_extended = jnp.concatenate((c_std, jnp.zeros(A_std.shape[0] + 1)))
+    c_aux = jnp.concatenate(
+        (jnp.zeros_like(c_std), jnp.ones(A_std.shape[0]), jnp.zeros(1))
+    )
     tableau = jnp.vstack((tableau, c_extended, c_aux))
 
     # Zero out reduced cost muls of initial basis
-    for i in range(A.shape[0]):
+    for i in range(A_std.shape[0]):
         tableau = tableau.at[-1].set(tableau[-1] - tableau[i])
 
     # Solve auxiliary problem
-    basis = jnp.arange(A.shape[1], A.shape[1] + A.shape[0])
-    x = jnp.concatenate((jnp.zeros_like(c), b))
+    basis = jnp.arange(A_std.shape[1], A_std.shape[1] + A_std.shape[0])
+    x = jnp.concatenate((jnp.zeros_like(c_std), b_std))
     aux_start = SimplexStep(tableau, basis, x)
     aux_sol_type = SimplexSolutionType(jnp.array([True]), jnp.array([True]))
     aux_sol, aux_sol_type = _simplex(aux_start, aux_sol_type, 2, dual_tol)
-    x = aux_sol.x[: c.size]
+    x = aux_sol.x[: c_std.size]
 
     # Remove auxiliary variables from tableau for real problem
     tableau = aux_sol.tableau[:-1, :]
     tableau = jnp.delete(
         tableau,
-        jnp.arange(A.shape[1], A.shape[1] + A.shape[0]),
+        jnp.arange(A_std.shape[1], A_std.shape[1] + A_std.shape[0]),
         axis=1,
         assume_unique_indices=True,
     )
 
     redundant_cons = jnp.expand_dims(
-        jnp.concatenate((aux_sol.basis > A.shape[1], jnp.array([False]))), -1
+        jnp.concatenate((aux_sol.basis > A_std.shape[1], jnp.array([False]))), -1
     )
     tableau = jnp.where(redundant_cons, jnp.abs(tableau), tableau)
 
@@ -277,16 +279,16 @@ def linprog(
     real_start = SimplexStep(
         tableau,
         aux_sol.basis,
-        aux_sol.x[: c.size],
+        aux_sol.x[: c_std.size],
     )
     real_sol_type = SimplexSolutionType(feasible, jnp.array([True]))
     sol, sol_type = _simplex(real_start, real_sol_type, 1, dual_tol)
 
     # Remove synthetic variables from returned result
     if unbounded:
-        real_pos, real_neg, _ = jnp.split(sol.x, (len(obj), 2 * len(obj)))
+        real_pos, real_neg, _ = jnp.split(sol.x, (len(c), 2 * len(c)))
         sol.x = real_pos - real_neg
     else:
-        sol.x, _ = jnp.split(sol.x, (len(obj),))
+        sol.x, _ = jnp.split(sol.x, (len(c),))
 
     return sol, sol_type
