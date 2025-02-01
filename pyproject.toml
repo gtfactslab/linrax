@@ -11,8 +11,11 @@ readme = "README.md"
 version = "2025.01.30"
 requires-python = ">=3.11"
 dependencies = [
-	"jax",
+	"jax ~= 0.4.35",
 ]
+
+[project.optional-dependencies]
+cuda = ["jax[cuda12_pip] ~= 0.4.35"]
 
 [project.urls]
 Repository = "https://github.com/gtfactslab/linrax.git"
@@ -22,7 +25,7 @@ packages = ["linrax"]
 
 [tool.hatch.envs.hatch-test]
 extra-dependencies = [
-	"scipy",
-	"matplotlib",
+	"scipy ~= 1.14.1",
+	"matplotlib ~= 3.9.2",
 	"pytest~=8.1",
 ]
