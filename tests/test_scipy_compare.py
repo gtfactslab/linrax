@@ -150,7 +150,7 @@ aux_vars = jnp.array(
         for n in range(1, N + 1)
     ]
 )
-H = jnp.array([[1.0, 0.0], [0.0, 1.0]])
+H = jnp.eye(2)
 Hs = [jnp.vstack((H, aux_vars[: i + 1])) for i in range(N)]
 
 A_eq = jnp.array([aux_vars[0]])
@@ -161,6 +161,30 @@ c = aux_vars[0]
 test_cases.append(
     {"c": c, "A_eq": A_eq, "b_eq": b_eq, "A_ub": A_ub, "b_ub": b_ub, "unbounded": True}
 )
+
+A_ub = jnp.vstack((Hs[-1], -Hs[-1]))
+b_ub = jnp.array(
+    [
+        1.1,
+        0.1,
+        1.0344541,
+        0.76402193,
+        0.34226587,
+        -0.10277606,
+        -0.48295766,
+        -0.76748353,
+        -0.9,
+        -0.1,
+        -0.7674836,
+        -0.48295766,
+        -0.10277608,
+        0.34226584,
+        0.76402193,
+        1.0344541,
+    ]
+)
+c = jnp.array([1.0, 0])
+test_cases.append({"c": c, "A_ub": A_ub, "b_ub": b_ub})
 
 
 @pytest.mark.parametrize("kwargs", test_cases)
