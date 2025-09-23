@@ -2,6 +2,12 @@
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
+[tool.ruff]
+
+[tool.ruff.lint]
+
+ignore = ["E731"] # ignore "do not assign a lambda expression, use a def"
+
 [project]
 name = "linrax"
 description = "A JAX-compatible, simplex method-based linear program solver"
@@ -33,5 +39,5 @@ packages = ["linrax"]
 [tool.hatch.envs.hatch-test]
 extra-dependencies = [
 	"scipy ~= 1.14.1",
-	"pytest~=8.1",
+	"pytest ~= 8.1",
 ]
