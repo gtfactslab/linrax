@@ -1,1 +1,6 @@
-from .optim import SimplexStep, SimplexSolutionType, linprog
+from .optim import (
+    SimplexStep as SimplexStep,
+    SimplexSolutionType as SimplexSolutionType,
+    linprog as linprog,
+)
+
