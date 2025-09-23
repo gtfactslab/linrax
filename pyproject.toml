@@ -17,11 +17,11 @@ readme = "README.md"
 version = "2025.02.01"
 requires-python = ">=3.11"
 dependencies = [
-	"jax ~= 0.4.35",
+	"jax ~= 0.6.1",
 ]
 
 [project.optional-dependencies]
-cuda = ["jax[cuda12_pip] ~= 0.4.35"]
+cuda = ["jax[cuda12] ~= 0.6.1"]
 examples = [
 	"scipy ~= 1.14.1",
 	"cvxpy ~= 1.5.3",
