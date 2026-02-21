@@ -8,6 +8,28 @@ JAX-compatible, simplex method-based linear program solver. As part of the JAX e
 
 `linrax` is designed for use as a subroutine in a larger JAX pipeline. Its performance excels on smaller problems ($<50$ input variables), and is fully tracable in any of JAX's main transformations. In particular, `linrax` can solve problems that are specified with linearly dependent constraints, an area where other JAX-based solvers struggle. 
 
+## Installation
+
+`linrax` is available on PyPI:
+
+```shell
+pip install linrax
+```
+
+### CUDA support
+
+`linrax` supports CUDA via JAX. To enable GPU acceleration, install the appropriate JAX CUDA build for your CUDA version *before* installing `linrax`:
+
+```shell
+# CUDA 12
+pip install "jax[cuda12]"
+
+# CUDA 13
+pip install "jax[cuda13]"
+```
+
+See the [JAX installation guide](https://jax.readthedocs.io/en/latest/installation.html) for further details.
+
 ## Usage
 
 The interface of `linrax` is designed to closely mimic that of `scipy.linprog`. 
