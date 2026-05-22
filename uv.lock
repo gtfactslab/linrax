@@ -7,7 +7,6 @@ resolution-markers = [
     "python_full_version < '3.12'",
 ]
 conflicts = [[
-    { package = "linrax", extra = "cpu" },
     { package = "linrax", extra = "cuda12" },
     { package = "linrax", extra = "cuda13" },
 ]]
@@ -17,7 +16,7 @@ name = "cffi"
 version = "2.0.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "pycparser", marker = "implementation_name != 'PyPy' or (extra == 'extra-6-linrax-cpu' and extra == 'extra-6-linrax-cuda12') or (extra == 'extra-6-linrax-cpu' and extra == 'extra-6-linrax-cuda13') or (extra == 'extra-6-linrax-cuda12' and extra == 'extra-6-linrax-cuda13')" },
+    { name = "pycparser", marker = "implementation_name != 'PyPy' or (extra == 'extra-6-linrax-cuda12' and extra == 'extra-6-linrax-cuda13')" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/eb/56/b1ba7935a17738ae8453301356628e8147c79dbb825bcbc73dc7401f9846/cffi-2.0.0.tar.gz", hash = "sha256:44d1b5909021139fe36001ae048dbdde8214afa20200eda0f64c068cac5d5529", size = 523588, upload-time = "2025-09-08T23:24:04.541Z" }
 wheels = [
@@ -388,11 +387,11 @@ wheels = [
 
 [package.optional-dependencies]
 cuda12 = [
-    { name = "jax-cuda12-plugin", extra = ["with-cuda"] },
+    { name = "jax-cuda12-plugin", extra = ["with-cuda"], marker = "extra == 'extra-6-linrax-cuda12'" },
     { name = "jaxlib" },
 ]
 cuda13 = [
-    { name = "jax-cuda13-plugin", extra = ["with-cuda"] },
+    { name = "jax-cuda13-plugin", extra = ["with-cuda"], marker = "extra == 'extra-6-linrax-cuda13'" },
     { name = "jaxlib" },
 ]
 
@@ -429,18 +428,18 @@ wheels = [
 
 [package.optional-dependencies]
 with-cuda = [
-    { name = "nvidia-cublas-cu12", marker = "sys_platform == 'linux' or (extra == 'extra-6-linrax-cpu' and extra == 'extra-6-linrax-cuda12') or (extra == 'extra-6-linrax-cpu' and extra == 'extra-6-linrax-cuda13') or (extra == 'extra-6-linrax-cuda12' and extra == 'extra-6-linrax-cuda13')" },
-    { name = "nvidia-cuda-cupti-cu12", marker = "sys_platform == 'linux' or (extra == 'extra-6-linrax-cpu' and extra == 'extra-6-linrax-cuda12') or (extra == 'extra-6-linrax-cpu' and extra == 'extra-6-linrax-cuda13') or (extra == 'extra-6-linrax-cuda12' and extra == 'extra-6-linrax-cuda13')" },
-    { name = "nvidia-cuda-nvcc-cu12", marker = "sys_platform == 'linux' or (extra == 'extra-6-linrax-cpu' and extra == 'extra-6-linrax-cuda12') or (extra == 'extra-6-linrax-cpu' and extra == 'extra-6-linrax-cuda13') or (extra == 'extra-6-linrax-cuda12' and extra == 'extra-6-linrax-cuda13')" },
-    { name = "nvidia-cuda-nvrtc-cu12", marker = "sys_platform == 'linux' or (extra == 'extra-6-linrax-cpu' and extra == 'extra-6-linrax-cuda12') or (extra == 'extra-6-linrax-cpu' and extra == 'extra-6-linrax-cuda13') or (extra == 'extra-6-linrax-cuda12' and extra == 'extra-6-linrax-cuda13')" },
-    { name = "nvidia-cuda-runtime-cu12", marker = "sys_platform == 'linux' or (extra == 'extra-6-linrax-cpu' and extra == 'extra-6-linrax-cuda12') or (extra == 'extra-6-linrax-cpu' and extra == 'extra-6-linrax-cuda13') or (extra == 'extra-6-linrax-cuda12' and extra == 'extra-6-linrax-cuda13')" },
-    { name = "nvidia-cudnn-cu12", marker = "sys_platform == 'linux' or (extra == 'extra-6-linrax-cpu' and extra == 'extra-6-linrax-cuda12') or (extra == 'extra-6-linrax-cpu' and extra == 'extra-6-linrax-cuda13') or (extra == 'extra-6-linrax-cuda12' and extra == 'extra-6-linrax-cuda13')" },
-    { name = "nvidia-cufft-cu12", marker = "sys_platform == 'linux' or (extra == 'extra-6-linrax-cpu' and extra == 'extra-6-linrax-cuda12') or (extra == 'extra-6-linrax-cpu' and extra == 'extra-6-linrax-cuda13') or (extra == 'extra-6-linrax-cuda12' and extra == 'extra-6-linrax-cuda13')" },
-    { name = "nvidia-cusolver-cu12", marker = "sys_platform == 'linux' or (extra == 'extra-6-linrax-cpu' and extra == 'extra-6-linrax-cuda12') or (extra == 'extra-6-linrax-cpu' and extra == 'extra-6-linrax-cuda13') or (extra == 'extra-6-linrax-cuda12' and extra == 'extra-6-linrax-cuda13')" },
-    { name = "nvidia-cusparse-cu12", marker = "sys_platform == 'linux' or (extra == 'extra-6-linrax-cpu' and extra == 'extra-6-linrax-cuda12') or (extra == 'extra-6-linrax-cpu' and extra == 'extra-6-linrax-cuda13') or (extra == 'extra-6-linrax-cuda12' and extra == 'extra-6-linrax-cuda13')" },
-    { name = "nvidia-nccl-cu12", marker = "sys_platform == 'linux' or (extra == 'extra-6-linrax-cpu' and extra == 'extra-6-linrax-cuda12') or (extra == 'extra-6-linrax-cpu' and extra == 'extra-6-linrax-cuda13') or (extra == 'extra-6-linrax-cuda12' and extra == 'extra-6-linrax-cuda13')" },
-    { name = "nvidia-nvjitlink-cu12", marker = "sys_platform == 'linux' or (extra == 'extra-6-linrax-cpu' and extra == 'extra-6-linrax-cuda12') or (extra == 'extra-6-linrax-cpu' and extra == 'extra-6-linrax-cuda13') or (extra == 'extra-6-linrax-cuda12' and extra == 'extra-6-linrax-cuda13')" },
-    { name = "nvidia-nvshmem-cu12", marker = "sys_platform == 'linux' or (extra == 'extra-6-linrax-cpu' and extra == 'extra-6-linrax-cuda12') or (extra == 'extra-6-linrax-cpu' and extra == 'extra-6-linrax-cuda13') or (extra == 'extra-6-linrax-cuda12' and extra == 'extra-6-linrax-cuda13')" },
+    { name = "nvidia-cublas-cu12", marker = "sys_platform == 'linux'" },
+    { name = "nvidia-cuda-cupti-cu12", marker = "sys_platform == 'linux'" },
+    { name = "nvidia-cuda-nvcc-cu12", marker = "sys_platform == 'linux'" },
+    { name = "nvidia-cuda-nvrtc-cu12", marker = "sys_platform == 'linux'" },
+    { name = "nvidia-cuda-runtime-cu12", marker = "sys_platform == 'linux'" },
+    { name = "nvidia-cudnn-cu12", marker = "sys_platform == 'linux'" },
+    { name = "nvidia-cufft-cu12", marker = "sys_platform == 'linux'" },
+    { name = "nvidia-cusolver-cu12", marker = "sys_platform == 'linux'" },
+    { name = "nvidia-cusparse-cu12", marker = "sys_platform == 'linux'" },
+    { name = "nvidia-nccl-cu12", marker = "sys_platform == 'linux'" },
+    { name = "nvidia-nvjitlink-cu12", marker = "sys_platform == 'linux'" },
+    { name = "nvidia-nvshmem-cu12", marker = "sys_platform == 'linux'" },
 ]
 
 [[package]]
@@ -476,18 +475,18 @@ wheels = [
 
 [package.optional-dependencies]
 with-cuda = [
-    { name = "nvidia-cublas", marker = "sys_platform == 'linux' or (extra == 'extra-6-linrax-cpu' and extra == 'extra-6-linrax-cuda12') or (extra == 'extra-6-linrax-cpu' and extra == 'extra-6-linrax-cuda13') or (extra == 'extra-6-linrax-cuda12' and extra == 'extra-6-linrax-cuda13')" },
-    { name = "nvidia-cuda-cupti", marker = "sys_platform == 'linux' or (extra == 'extra-6-linrax-cpu' and extra == 'extra-6-linrax-cuda12') or (extra == 'extra-6-linrax-cpu' and extra == 'extra-6-linrax-cuda13') or (extra == 'extra-6-linrax-cuda12' and extra == 'extra-6-linrax-cuda13')" },
-    { name = "nvidia-cuda-nvcc", marker = "sys_platform == 'linux' or (extra == 'extra-6-linrax-cpu' and extra == 'extra-6-linrax-cuda12') or (extra == 'extra-6-linrax-cpu' and extra == 'extra-6-linrax-cuda13') or (extra == 'extra-6-linrax-cuda12' and extra == 'extra-6-linrax-cuda13')" },
-    { name = "nvidia-cuda-nvrtc", marker = "sys_platform == 'linux' or (extra == 'extra-6-linrax-cpu' and extra == 'extra-6-linrax-cuda12') or (extra == 'extra-6-linrax-cpu' and extra == 'extra-6-linrax-cuda13') or (extra == 'extra-6-linrax-cuda12' and extra == 'extra-6-linrax-cuda13')" },
-    { name = "nvidia-cuda-runtime", marker = "sys_platform == 'linux' or (extra == 'extra-6-linrax-cpu' and extra == 'extra-6-linrax-cuda12') or (extra == 'extra-6-linrax-cpu' and extra == 'extra-6-linrax-cuda13') or (extra == 'extra-6-linrax-cuda12' and extra == 'extra-6-linrax-cuda13')" },
-    { name = "nvidia-cudnn-cu13", marker = "sys_platform == 'linux' or (extra == 'extra-6-linrax-cpu' and extra == 'extra-6-linrax-cuda12') or (extra == 'extra-6-linrax-cpu' and extra == 'extra-6-linrax-cuda13') or (extra == 'extra-6-linrax-cuda12' and extra == 'extra-6-linrax-cuda13')" },
-    { name = "nvidia-cufft", marker = "sys_platform == 'linux' or (extra == 'extra-6-linrax-cpu' and extra == 'extra-6-linrax-cuda12') or (extra == 'extra-6-linrax-cpu' and extra == 'extra-6-linrax-cuda13') or (extra == 'extra-6-linrax-cuda12' and extra == 'extra-6-linrax-cuda13')" },
-    { name = "nvidia-cusolver", marker = "sys_platform == 'linux' or (extra == 'extra-6-linrax-cpu' and extra == 'extra-6-linrax-cuda12') or (extra == 'extra-6-linrax-cpu' and extra == 'extra-6-linrax-cuda13') or (extra == 'extra-6-linrax-cuda12' and extra == 'extra-6-linrax-cuda13')" },
-    { name = "nvidia-cusparse", marker = "sys_platform == 'linux' or (extra == 'extra-6-linrax-cpu' and extra == 'extra-6-linrax-cuda12') or (extra == 'extra-6-linrax-cpu' and extra == 'extra-6-linrax-cuda13') or (extra == 'extra-6-linrax-cuda12' and extra == 'extra-6-linrax-cuda13')" },
-    { name = "nvidia-nccl-cu13", marker = "sys_platform == 'linux' or (extra == 'extra-6-linrax-cpu' and extra == 'extra-6-linrax-cuda12') or (extra == 'extra-6-linrax-cpu' and extra == 'extra-6-linrax-cuda13') or (extra == 'extra-6-linrax-cuda12' and extra == 'extra-6-linrax-cuda13')" },
-    { name = "nvidia-nvjitlink", marker = "sys_platform == 'linux' or (extra == 'extra-6-linrax-cpu' and extra == 'extra-6-linrax-cuda12') or (extra == 'extra-6-linrax-cpu' and extra == 'extra-6-linrax-cuda13') or (extra == 'extra-6-linrax-cuda12' and extra == 'extra-6-linrax-cuda13')" },
-    { name = "nvidia-nvshmem-cu13", marker = "sys_platform == 'linux' or (extra == 'extra-6-linrax-cpu' and extra == 'extra-6-linrax-cuda12') or (extra == 'extra-6-linrax-cpu' and extra == 'extra-6-linrax-cuda13') or (extra == 'extra-6-linrax-cuda12' and extra == 'extra-6-linrax-cuda13')" },
+    { name = "nvidia-cublas", marker = "sys_platform == 'linux'" },
+    { name = "nvidia-cuda-cupti", marker = "sys_platform == 'linux'" },
+    { name = "nvidia-cuda-nvcc", marker = "sys_platform == 'linux'" },
+    { name = "nvidia-cuda-nvrtc", marker = "sys_platform == 'linux'" },
+    { name = "nvidia-cuda-runtime", marker = "sys_platform == 'linux'" },
+    { name = "nvidia-cudnn-cu13", marker = "sys_platform == 'linux'" },
+    { name = "nvidia-cufft", marker = "sys_platform == 'linux'" },
+    { name = "nvidia-cusolver", marker = "sys_platform == 'linux'" },
+    { name = "nvidia-cusparse", marker = "sys_platform == 'linux'" },
+    { name = "nvidia-nccl-cu13", marker = "sys_platform == 'linux'" },
+    { name = "nvidia-nvjitlink", marker = "sys_platform == 'linux'" },
+    { name = "nvidia-nvshmem-cu13", marker = "sys_platform == 'linux'" },
     { name = "nvidia-nvvm" },
 ]
 
@@ -671,25 +670,23 @@ wheels = [
 name = "linrax"
 version = "0.2.0"
 source = { editable = "." }
+dependencies = [
+    { name = "jax" },
+]
 
 [package.optional-dependencies]
+cuda12 = [
+    { name = "jax", extra = ["cuda12"], marker = "extra == 'extra-6-linrax-cuda12'" },
+]
+cuda13 = [
+    { name = "jax", extra = ["cuda13"], marker = "extra == 'extra-6-linrax-cuda13'" },
+]
 examples = [
     { name = "cvxpy" },
     { name = "gurobipy" },
     { name = "jaxopt" },
     { name = "matplotlib" },
     { name = "scipy" },
-]
-
-[package.dev-dependencies]
-cpu = [
-    { name = "jax" },
-]
-cuda12 = [
-    { name = "jax", extra = ["cuda12"] },
-]
-cuda13 = [
-    { name = "jax", extra = ["cuda13"] },
 ]
 test = [
     { name = "pytest" },
@@ -699,17 +696,15 @@ test = [
 requires-dist = [
     { name = "cvxpy", marker = "extra == 'examples'", specifier = "~=1.9.0" },
     { name = "gurobipy", marker = "extra == 'examples'", specifier = "~=12.0.0" },
+    { name = "jax", specifier = ">=0.6.1" },
+    { name = "jax", extras = ["cuda12"], marker = "extra == 'cuda12'", specifier = ">=0.6.1" },
+    { name = "jax", extras = ["cuda13"], marker = "extra == 'cuda13'", specifier = ">=0.7.0" },
     { name = "jaxopt", marker = "extra == 'examples'", specifier = "~=0.8.3" },
     { name = "matplotlib", marker = "extra == 'examples'", specifier = "~=3.9.2" },
+    { name = "pytest", marker = "extra == 'test'", specifier = "~=8.1" },
     { name = "scipy", marker = "extra == 'examples'", specifier = "~=1.14.1" },
 ]
-provides-extras = ["examples"]
-
-[package.metadata.requires-dev]
-cpu = [{ name = "jax", specifier = ">=0.6.1" }]
-cuda12 = [{ name = "jax", extras = ["cuda12"], specifier = ">=0.6.1" }]
-cuda13 = [{ name = "jax", extras = ["cuda13"], specifier = ">=0.7.0" }]
-test = [{ name = "pytest", specifier = "~=8.1" }]
+provides-extras = ["cuda12", "cuda13", "examples", "test"]
 
 [[package]]
 name = "markupsafe"
@@ -1418,7 +1413,7 @@ name = "pytest"
 version = "8.4.2"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "colorama", marker = "sys_platform == 'win32' or (extra == 'extra-6-linrax-cpu' and extra == 'extra-6-linrax-cuda12') or (extra == 'extra-6-linrax-cpu' and extra == 'extra-6-linrax-cuda13') or (extra == 'extra-6-linrax-cuda12' and extra == 'extra-6-linrax-cuda13')" },
+    { name = "colorama", marker = "sys_platform == 'win32' or (extra == 'extra-6-linrax-cuda12' and extra == 'extra-6-linrax-cuda13')" },
     { name = "iniconfig" },
     { name = "packaging" },
     { name = "pluggy" },

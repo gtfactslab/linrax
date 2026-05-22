@@ -4,11 +4,20 @@ version = "0.2.0"
 description = "A JAX-compatible, simplex method-based linear program solver"
 readme = "README.md"
 requires-python = ">=3.11"
+dependencies = [
+    "jax>=0.6.1",
+]
 
 [project.urls]
 Repository = "https://github.com/gtfactslab/linrax.git"
 
 [project.optional-dependencies]
+cuda12 = [
+    "jax[cuda12]>=0.6.1",
+]
+cuda13 = [
+    "jax[cuda13]>=0.7.0",
+]
 examples = [
     "cvxpy~=1.9.0",
     "gurobipy~=12.0.0",
@@ -17,16 +26,6 @@ examples = [
     "scipy~=1.14.1",
 ]
 
-[dependency-groups]
-cpu = [
-    "jax>=0.6.1",
-]
-cuda12 = [
-    "jax[cuda12]>=0.6.1",
-]
-cuda13 = [
-    "jax[cuda13]>=0.7.0",
-]
 test = [
     "pytest~=8.1",
 ]
@@ -34,12 +33,16 @@ test = [
 [tool.uv]
 conflicts = [
     [
-        {extra = "cpu"},
         {extra = "cuda12"},
         {extra = "cuda13"},
     ],
 ]
-default-groups = ["cpu"]
+
+[[tool.uv.index]]
+name = "testpypi"
+url = "https://test.pypi.org/simple/"
+publish-url = "https://test.pypi.org/legacy/"
+explicit = true
 
 [build-system]
 requires = ["hatchling"]
