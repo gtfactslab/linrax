@@ -1,6 +1,6 @@
 [project]
 name = "linrax"
-version = "0.2.0"
+version = "0.3.0b1"
 description = "A JAX-compatible, simplex method-based linear program solver"
 readme = "README.md"
 requires-python = ">=3.11"
