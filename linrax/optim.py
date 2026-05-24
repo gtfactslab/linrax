@@ -175,6 +175,11 @@ def _simplex(
 
         # Find exiting variable / pivot row
         exiting_rates = tableau[:-num_cost_rows, entering_col]
+        exiting_rates = jax.lax.select(
+            jnp.greater(step.basis, step.tableau.shape[1] - 1),
+            jnp.abs(exiting_rates),
+            exiting_rates,
+        )  # Mark possible aux vars for pivot out
         div = jnp.divide(tableau[:-num_cost_rows, -1], exiting_rates)
         ratios = jax.lax.select(
             jnp.greater(exiting_rates, dual_tol), div, jnp.inf * jnp.ones_like(div)
@@ -265,11 +270,6 @@ def linprog(
         axis=1,
         assume_unique_indices=True,
     )
-
-    redundant_cons = jnp.expand_dims(
-        jnp.concatenate((aux_sol.basis > A_std.shape[1], jnp.array([False]))), -1
-    )
-    tableau = jnp.where(redundant_cons, jnp.abs(tableau), tableau)
 
     feasible = jnp.allclose(
         c_aux[:-1] @ aux_sol.x, jnp.array([0]), atol=primal_tol
